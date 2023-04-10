@@ -26,10 +26,10 @@
     font-weight: bold;
     cursor: pointer;
     outline: none;
-    background: rgb(227, 240, 219);;
+    background: rgb(227, 240, 219);
+    border-radius: 15px;
   }
   h2 {
     margin-bottom: 10px;
     text-align: center;
-    padding:20px;
   }

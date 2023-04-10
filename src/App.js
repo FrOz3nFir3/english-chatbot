@@ -10,7 +10,7 @@ function App() {
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [isListening, setIsListening] = useState(false);
   const [speakTime, setSpeakTime] = useState(false)
-  const [response, setResponse] = useState("Hi i am here to help")
+  const [response, setResponse] = useState("रांजू, डरने की कोई बात नहीं है। हम यहां आपकी मदद करने के लिए हैं। धीरे-धीरे आपकी अंग्रेजी सुधरेगी। बस कोशिश करते जाइए। Convo Dost: Ranju, tell me more about your hobbies other than singing.")
   const microphoneRef = useRef(null);
   // useEffect(() => {
   //   fetch("https://")
@@ -75,7 +75,7 @@ function App() {
       </div>
       {transcript && (
         <div className="microphone-result-container">
-          <div className="microphone-result-text">{transcript}</div>
+          <div className="microphone-result-text">USER::{transcript}</div>
           <div className="microphone-result-text">{response}</div>
           <div>
             <Speech

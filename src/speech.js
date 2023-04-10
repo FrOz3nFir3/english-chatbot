@@ -7,7 +7,6 @@ import './speech.css';
 const Speech = ({ response }) => {
     let [value, setValue] = React.useState("");
     const { speak } = useSpeechSynthesis();
-    value = "Mai so raha hu"
     //   useEffect(() => {
     //     fetch("https://")
     //       .then(response => response.json())
