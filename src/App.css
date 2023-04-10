@@ -11,7 +11,7 @@ body {
 .mircophone-container {
   display: flex;
   flex-wrap: wrap;
-
+  padding: 2rem;
   justify-content: center;
   align-items: center;
   height: 30vh;
@@ -38,16 +38,16 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform:translate(-50%, -50%) scale(1.4);
+  transform: translate(-50%, -50%) scale(1.4);
   border-radius: 50%;
   animation: listening infinite 1.5s;
 }
-@keyframes listening{
-  0%{
+@keyframes listening {
+  0% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
-  100%{
+  100% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(1.4);
   }
@@ -97,4 +97,35 @@ body {
 h1 {
   text-align: center;
   padding-top: 30px;
+}
+
+form > div label:first-child {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.3em;
+  font-size: 1.2rem;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  padding: 2em;
+  max-width: 45rem;
+  margin: auto;
+  text-align: center;
+}
+
+.title {
+  font-size: 3rem;
+}
+
+.subtitle {
+  font-size: 2rem;
 }
