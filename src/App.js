@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -8,7 +8,8 @@ import Speech from "./speech";
 import axios from "axios";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
-
+import { click } from "@testing-library/user-event/dist/click";
+import LoadingOverlay from "react-loading-overlay";
 const animatedComponents = makeAnimated();
 
 // import microPhoneIcon from "./microphone.svg";
@@ -25,7 +26,10 @@ const levelOptions = [
   { value: "advanced", label: "Advanced" },
 ];
 
+let count = 0;
 function App() {
+  const [isFetching, updateFetching] = useState(false);
+
   const [selectedHobbies, updateHobbies] = useState(null);
   const [selectedLevel, updateLevels] = useState(null);
 
@@ -34,53 +38,88 @@ function App() {
   const [errors, setErrors] = useState(null);
 
   const [clicked, updateClicked] = useState(false);
+
   const [isListening, setIsListening] = useState(false);
   const [speakTime, setSpeakTime] = useState(false);
 
-  const [teacherResponse, setTeacherResponse] = useState("");
-  const [response, setResponse] = useState("");
+  const [apiResponse, setResponse] = useState([]);
 
   const microphoneRef = useRef(null);
 
   const nameRef = useRef(null);
 
-  console.log(response);
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const onSubmit = async (event) => {
     event.preventDefault();
 
     let name = nameRef.current.value;
     if (name.trim().length == 0) {
-      return setErrors("Please type your names");
+      return setErrors("Please type your Name!");
     }
 
     if (selectedHobbies == null || selectedHobbies.length == 0) {
-      return setErrors("Please select your hobbies");
+      return setErrors("Please select your Hobbies!");
     }
     let hobbies = selectedHobbies.map((item) => item.label);
 
     if (selectedLevel == null || selectedLevel.length == 0) {
-      return setErrors("Please select your English Level");
+      return setErrors("Please select your English Level!");
     }
     let level = selectedLevel.label;
 
-    axios
-      .post(
-        "https://20005.stg.doubtnut.com/v1/lang-buddy/setLangBudUserDetails",
-        {
-          name,
-          hobbies,
-          level,
-        },
-        {
-          timeout: 5000,
-        }
-      )
-      .then((_) => alert("submission is sucessfull"));
+    axios.post(
+      "https://20007.stg.doubtnut.com/v1/lang-buddy/setLangBudUserDetails",
+      {
+        name,
+        hobbies,
+        level,
+      },
+      {
+        timeout: 5000,
+      }
+    );
+    // .then((_) => );
 
     updateClicked(true);
     setErrors(null);
   };
+
+  React.useEffect(() => {
+    if (count == 0 && clicked == true) {
+      updateFetching(true);
+      count++;
+
+      // setTimeout(() => {
+      //   updateFetching(false);
+      // }, 5000);
+
+      axios
+        .post(
+          `https://20007.stg.doubtnut.com/v1/lang-buddy/getLangBuddy`,
+          {},
+          {
+            timeout: 300000,
+          }
+        )
+        .then((response) => {
+          setResponse((previousArr) => {
+            const copyArr = [...previousArr];
+            copyArr.push(response.data.data.result);
+            updateFetching(false);
+
+            return copyArr;
+          });
+        });
+    }
+  }, [clicked]);
+
+  // React.useEffect(() => {
+  //   scrollToBottom();
+  // }, [apiResponse]);
 
   if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
     return (
@@ -98,12 +137,14 @@ function App() {
   };
   const stopHandle = () => {
     setIsListening(false);
+    updateFetching(true);
+
     microphoneRef.current.classList.remove("listening");
     SpeechRecognition.stopListening();
-    console.log("here transcript", transcript);
+    // console.log("here transcript", transcript);
     axios
       .post(
-        `https://20005.stg.doubtnut.com/v1/lang-buddy/getLangBuddy`,
+        `https://20007.stg.doubtnut.com/v1/lang-buddy/getLangBuddy`,
         {
           transcript,
         },
@@ -112,22 +153,41 @@ function App() {
         }
       )
       .then((response) => {
-        setResponse(response.data.data.resp.choices[0].message.content);
+        // console.log(response);
+
+        //response.data.resArr
+        setResponse((previousArr) => {
+          const copyArr = [...previousArr];
+          copyArr.push(response.data.data.result);
+          updateFetching(false);
+          setTimeout(() => {
+            scrollToBottom();
+          }, 1000);
+          return copyArr;
+        });
         // setTeacherResponse(data.data.resp.choices[0].message.teacher);
+        resetTranscript();
       });
     setSpeakTime(true);
   };
   const handleReset = () => {
     stopHandle();
     resetTranscript();
+    setResponse([]);
   };
 
   return (
     <div className="microphone-wrapper">
+      {/* {isFetching && <div className="loading">Loading</div>} */}
       <div style={{ textAlign: "center" }}>
         <h1 className="title"> Hello Bache! </h1>
         <p className="subtitle"> Main hu aapka </p>
-        <p>Lang Buddy (img)</p>
+        <img
+          width={200}
+          height="auto"
+          src="https://d10lpgp6xz60nq.cloudfront.net/engagement_framework/DA24452C-32C8-7BA2-6735-281B6F5870B9.webp"
+          alt="lang buddy logo"
+        />
       </div>
 
       {clicked == false && (
@@ -205,42 +265,102 @@ function App() {
         </>
       )}
 
-      {clicked && (
-        <div className="mircophone-container">
-          <div
-            className="microphone-icon-container"
-            ref={microphoneRef}
-            onClick={handleListing}
-          >
-            {/* <img className="microphone-icon" src= alt='MIC' /> */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-              <path d="M192 0C139 0 96 43 96 96V256c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464H120c-13.3 0-24 10.7-24 24s10.7 24 24 24h72 72c13.3 0 24-10.7 24-24s-10.7-24-24-24H216V430.4c85.8-11.7 152-85.3 152-174.4V216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128s-128-57.3-128-128V216z" />
-            </svg>
+      <LoadingOverlay active={isFetching} spinner text="Loading ...">
+        {clicked && (
+          <div className="mircophone-container">
+            <div
+              className="microphone-icon-container"
+              ref={microphoneRef}
+              onClick={handleListing}
+            >
+              {/* <img className="microphone-icon" src= alt='MIC' /> */}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                <path d="M192 0C139 0 96 43 96 96V256c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464H120c-13.3 0-24 10.7-24 24s10.7 24 24 24h72 72c13.3 0 24-10.7 24-24s-10.7-24-24-24H216V430.4c85.8-11.7 152-85.3 152-174.4V216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128s-128-57.3-128-128V216z" />
+              </svg>
+            </div>
+            <div className="microphone-status">
+              {isListening ? "Listening........." : "Tap to Speak"}
+            </div>
+            {isListening && (
+              <button className="microphone-stop btn" onClick={stopHandle}>
+                Stop
+              </button>
+            )}
           </div>
-          <div className="microphone-status">
-            {isListening ? "Listening........." : "Click to start Listening"}
+        )}
+
+        {clicked && (
+          <div className="microphone-result-container">
+            <div
+              className="flex column"
+              style={{
+                gap: "2.5em",
+                height: "70vh",
+                overflow: "auto",
+                maxWidth: "50rem",
+              }}
+              ref={messagesEndRef}
+            >
+              {apiResponse.map(renderChats)}
+            </div>
+
+            <div
+              className="flex flex-wrap gap-1"
+              style={{ marginTop: "2em", padding: "1em" }}
+            >
+              {/* send the last response from the api (last item in the arrray)  convo*/}
+              <Speech
+                text="English Bandhu"
+                response={
+                  apiResponse[apiResponse.length - 1] &&
+                  apiResponse[apiResponse.length - 1].english_bandhu
+                }
+              />
+              <Speech
+                text="Teacher"
+                response={
+                  apiResponse[apiResponse.length - 1] &&
+                  apiResponse[apiResponse.length - 1].teacher
+                }
+              />
+
+              <button className="microphone-reset btn" onClick={handleReset}>
+                Reset
+              </button>
+            </div>
           </div>
-          {isListening && (
-            <button className="microphone-stop btn" onClick={stopHandle}>
-              Stop
-            </button>
-          )}
-        </div>
-      )}
-      {transcript && (
-        <div className="microphone-result-container">
-          <div className="microphone-result-text">USER::{transcript}</div>
-          <div className="microphone-result-text">{response}</div>
-          <div>
-            <Speech response={response} />
-          </div>
-          <button className="microphone-reset btn" onClick={handleReset}>
-            Reset
-          </button>
-        </div>
-      )}
+        )}
+      </LoadingOverlay>
     </div>
   );
+
+  function renderChats(item, index) {
+    return (
+      <div
+        className="flex column"
+        style={{ gap: "1em" }}
+        key={index.toString()}
+      >
+        <div className="flex">
+          {item.user && (
+            <div className="border">
+              {item.name}: {item.user}
+            </div>
+          )}
+
+          {item.teacher && (
+            <div style={{ background: "red" }} className="border">
+              Teacher: {item.teacher}
+            </div>
+          )}
+        </div>
+
+        {item.english_bandhu && (
+          <div className="border">English Bandhu: {item.english_bandhu}</div>
+        )}
+      </div>
+    );
+  }
 }
 
 export default App;
