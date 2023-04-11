@@ -141,6 +141,9 @@ input {
 .gap-1 {
   gap: 1em;
 }
+.grow {
+  flex-grow: 1;
+}
 
 .column {
   flex-direction: column;

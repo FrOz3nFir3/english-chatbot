@@ -8,7 +8,6 @@ import Speech from "./speech";
 import axios from "axios";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
-import { click } from "@testing-library/user-event/dist/click";
 import LoadingOverlay from "react-loading-overlay";
 const animatedComponents = makeAnimated();
 
@@ -17,7 +16,12 @@ const animatedComponents = makeAnimated();
 const hobbiesOptions = [
   { value: "riding-bike", label: "Riding Bike" },
   { value: "racing", label: "Racing" },
-  { value: "playing-games", label: "Playing Games" },
+  { value: "playing-indoor-games", label: "Playing Indoor Games" },
+  { value: "playing-outdoor-games", label: "Playing Outdoor Games" },
+  { value: "reading-books", label: "Reading Books" },
+  { value: "dancing", label: "Dancing" },
+  { value: "singing", label: "Singing" },
+  { value: "coding", label: "Coding" },
 ];
 
 const levelOptions = [
@@ -93,10 +97,6 @@ function App() {
       updateFetching(true);
       count++;
 
-      // setTimeout(() => {
-      //   updateFetching(false);
-      // }, 5000);
-
       axios
         .post(
           `https://20007.stg.doubtnut.com/v1/lang-buddy/getLangBuddy`,
@@ -116,10 +116,6 @@ function App() {
         });
     }
   }, [clicked]);
-
-  // React.useEffect(() => {
-  //   scrollToBottom();
-  // }, [apiResponse]);
 
   if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
     return (
@@ -299,11 +295,9 @@ function App() {
                 overflow: "auto",
                 maxWidth: "50rem",
               }}
-              ref={messagesEndRef}
             >
               {apiResponse.map(renderChats)}
             </div>
-
             <div
               className="flex flex-wrap gap-1"
               style={{ marginTop: "2em", padding: "1em" }}
@@ -340,23 +334,26 @@ function App() {
         className="flex column"
         style={{ gap: "1em" }}
         key={index.toString()}
+        ref={messagesEndRef}
       >
         <div className="flex">
           {item.user && (
-            <div className="border">
-              {item.name}: {item.user}
+            <div className="border grow">
+              <strong>{item.name}</strong>: {item.user}
             </div>
           )}
 
           {item.teacher && (
             <div style={{ background: "red" }} className="border">
-              Teacher: {item.teacher}
+              <strong>Teacher</strong>: {item.teacher}
             </div>
           )}
         </div>
 
         {item.english_bandhu && (
-          <div className="border">English Bandhu: {item.english_bandhu}</div>
+          <div className="border">
+            <strong>English Bandhu</strong>: {item.english_bandhu}
+          </div>
         )}
       </div>
     );
