@@ -13,6 +13,7 @@ const animatedComponents = makeAnimated();
 
 // import microPhoneIcon from "./microphone.svg";
 
+const BACKEND_API = "https://api3.doubtnut.com";
 const hobbiesOptions = [
   { value: "riding-bike", label: "Riding Bike" },
   { value: "racing", label: "Racing" },
@@ -76,7 +77,7 @@ function App() {
     let level = selectedLevel.label;
 
     axios.post(
-      "https://20007.stg.doubtnut.com/v1/lang-buddy/setLangBudUserDetails",
+      `${BACKEND_API}/v1/lang-buddy/setLangBudUserDetails`,
       {
         name,
         hobbies,
@@ -99,7 +100,7 @@ function App() {
 
       axios
         .post(
-          `https://20007.stg.doubtnut.com/v1/lang-buddy/getLangBuddy`,
+          `${BACKEND_API}/v1/lang-buddy/getLangBuddy`,
           {},
           {
             timeout: 300000,
@@ -140,7 +141,7 @@ function App() {
     // console.log("here transcript", transcript);
     axios
       .post(
-        `https://20007.stg.doubtnut.com/v1/lang-buddy/getLangBuddy`,
+        `${BACKEND_API}/v1/lang-buddy/getLangBuddy`,
         {
           transcript,
         },
@@ -176,7 +177,7 @@ function App() {
     <div className="microphone-wrapper">
       {/* {isFetching && <div className="loading">Loading</div>} */}
       <div style={{ textAlign: "center" }}>
-        <h1 className="title"> Hello Bache! </h1>
+        <h1 className="title"> Hello Bacche! </h1>
         <p className="subtitle"> Main hu aapka </p>
         <img
           width={200}
